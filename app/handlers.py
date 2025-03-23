@@ -2,7 +2,7 @@ import logging
 import requests
 import app.api_requests as aq
 import app.FSMContext as fsm
-from DataBase.requests import set_user
+from DataBase.requests import set_user, update_count
 from aiogram import F, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    await set_user(tg_id=message.from_user.id, username=message.from_user.first_name)
+    tg_id = message.from_user.id
+    username = message.from_user.first_name
+    await set_user(tg_id=tg_id, username=username)
     await message.answer("Викличте функцію /price щоб дізнатися ціну однієї монети!\nАбо напишіть назву токена і кількість!")
 
 
@@ -51,6 +53,8 @@ async def process_token(message: Message, state: fsm.FSMContext):
             await message.answer(f"Ціна токена {token}: {price:.2f} USD")
         else:
             await message.answer(f"Токен {token} не знайдено. Перевірте правильність введення.")
+
+        await update_count(tg_id=message.from_user.id)
 
     except Exception as e:
         logger.error(f"Помилка при запиті до API: {e}")
@@ -89,9 +93,9 @@ async def price_crypto(message: Message):
                 await message.answer(f"Ціна {amount} {token}: {total_price:.2f} USD")
             else:
                 await message.answer(f"Токен {token} не знайдено. Перевірте правильність введення.")
+            
+            await update_count(tg_id=message.from_user.id)
 
         except Exception as e:
             await message.answer("Не вдалося отримати дані про ціну. Спробуйте пізніше.")
-        
 
-    
