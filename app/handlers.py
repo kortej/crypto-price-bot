@@ -2,7 +2,7 @@ import logging
 import requests
 import app.api_requests as aq
 import app.FSMContext as fsm
-from DataBase.requests import set_user, update_count
+from DataBase.requests import set_user, update_count, add_token_request
 from aiogram import F, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
@@ -69,6 +69,11 @@ async def process_token(message: Message, state: fsm.FSMContext):
 async def price_crypto(message: Message):
     parts = message.text.strip().split()
 
+    token_value = message.text.strip().split()
+    user_id = message.from_user.id
+
+    await add_token_request(token_value[0].upper(), user_id)
+
     if len(parts) == 2:
         token = parts[0].upper()
         try:
@@ -94,7 +99,9 @@ async def price_crypto(message: Message):
             else:
                 await message.answer(f"Токен {token} не знайдено. Перевірте правильність введення.")
             
+            
             await update_count(tg_id=message.from_user.id)
+            
 
         except Exception as e:
             await message.answer("Не вдалося отримати дані про ціну. Спробуйте пізніше.")

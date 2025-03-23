@@ -29,6 +29,25 @@ class Counter(Base):
     user: Mapped['User'] = relationship("User", back_populates='counter')
 
 
+class Token(Base):
+    __tablename__ = "tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(String(20))
+    token_requests: Mapped[list["TokenRequest"]] = relationship(back_populates="token")
+
+
+class TokenRequest(Base):
+    __tablename__ = 'token_request'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))  
+    token_id: Mapped[int] = mapped_column(ForeignKey("tokens.id"))  
+    request_count: Mapped[int] = mapped_column(default=0) 
+    token: Mapped["Token"] = relationship(back_populates="token_requests")
+    user: Mapped["User"] = relationship("User")
+
+
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
