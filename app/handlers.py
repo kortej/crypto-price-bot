@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer("Викличте функцію /price щоб дізнатися ціну!")
+    await message.answer("Викличте функцію /price щоб дізнатися ціну однієї монети!\nАбо напишіть назву токена і кількість!")
 
 
 @router.message(Command('price'))
@@ -57,3 +57,39 @@ async def process_token(message: Message, state: fsm.FSMContext):
     # Скидаємо стан після завершення обробки
     await state.clear()
     logger.info(f"Стан скинуто для користувача {message.from_user.id}")
+
+
+@router.message(F.text)
+async def price_crypto(message: Message):
+    parts = message.text.strip().split()
+
+    if len(parts) == 2:
+        token = parts[0].upper()
+        try:
+            amount = float(parts[1])
+        except ValueError:
+            await message.answer("Невірний формат\nВірний формат (приклад): BTC 1")
+            return
+        
+
+        params = {
+            "symbol": token,
+            "convert": "USD",
+        }
+
+        try:
+            response = requests.get(aq.CMC_URL, headers=aq.headers, params=params)
+            data = response.json()
+
+            if "data" in data and token in data["data"]:
+                price = data['data'][token][0]['quote']["USD"]["price"]
+                total_price = price * amount
+                await message.answer(f"Ціна {amount} {token}: {total_price:.2f} USD")
+            else:
+                await message.answer(f"Токен {token} не знайдено. Перевірте правильність введення.")
+
+        except Exception as e:
+            await message.answer("Не вдалося отримати дані про ціну. Спробуйте пізніше.")
+        
+
+    
