@@ -35,9 +35,9 @@ async def update_count(tg_id: int):
             await session.commit()
 
 
-async def add_token_request(token_value: str, user_id: int):
+async def add_token_request(token_value: str):
     async with async_session() as session:
-        
+        # Знаходимо або створюємо токен
         result = await session.execute(select(Token).where(Token.token == token_value))
         token = result.scalars().first()
         if not token:
@@ -45,15 +45,14 @@ async def add_token_request(token_value: str, user_id: int):
             session.add(token)
             await session.flush()  # Отримуємо ID токен
 
-        
+        # Знаходимо або створюємо запис TokenRequest для цього токену
         result = await session.execute(
             select(TokenRequest)
             .where(TokenRequest.token_id == token.id)
-            .where(TokenRequest.user_id == user_id)
         )
         token_request = result.scalars().first()
         if not token_request:
-            token_request = TokenRequest(token_id=token.id, user_id=user_id, request_count=0)
+            token_request = TokenRequest(token_id=token.id, request_count=0)
             session.add(token_request)
 
         

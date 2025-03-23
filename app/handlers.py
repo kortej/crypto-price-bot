@@ -70,9 +70,8 @@ async def price_crypto(message: Message):
     parts = message.text.strip().split()
 
     token_value = message.text.strip().split()
-    user_id = message.from_user.id
 
-    await add_token_request(token_value[0].upper(), user_id)
+    await add_token_request(token_value[0].upper()) # , user_id
 
     if len(parts) == 2:
         token = parts[0].upper()

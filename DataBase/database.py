@@ -40,12 +40,11 @@ class Token(Base):
 class TokenRequest(Base):
     __tablename__ = 'token_request'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))  
+    id: Mapped[int] = mapped_column(primary_key=True) 
     token_id: Mapped[int] = mapped_column(ForeignKey("tokens.id"))  
     request_count: Mapped[int] = mapped_column(default=0) 
     token: Mapped["Token"] = relationship(back_populates="token_requests")
-    user: Mapped["User"] = relationship("User")
+
 
 
 async def async_main():
