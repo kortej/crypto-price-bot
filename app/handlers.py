@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    await message.answer("Викличте функцію /price щоб дізнатися ціну однієї монети!\nАбо напишіть назву токена і кількість!")
+    await message.answer("Викличте функцію /price щоб дізнатися ціну однієї монети!\nАбо напишіть назву токена і кількість в форматі: токен кіл-сть!")
 
 
 @router.message(Command('price'))
