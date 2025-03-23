@@ -1,4 +1,4 @@
-from DataBase.database import async_session, User, Counter
+from DataBase.database import async_session, User, Counter, Token, TokenRequest
 from sqlalchemy import select
 
 
@@ -33,3 +33,28 @@ async def update_count(tg_id: int):
                 session.add(counter)
 
             await session.commit()
+
+
+async def add_token_request(token_value: str):
+    async with async_session() as session:
+        # Знаходимо або створюємо токен
+        result = await session.execute(select(Token).where(Token.token == token_value))
+        token = result.scalars().first()
+        if not token:
+            token = Token(token=token_value)
+            session.add(token)
+            await session.flush()  # Отримуємо ID токен
+
+        # Знаходимо або створюємо запис TokenRequest для цього токену
+        result = await session.execute(
+            select(TokenRequest)
+            .where(TokenRequest.token_id == token.id)
+        )
+        token_request = result.scalars().first()
+        if not token_request:
+            token_request = TokenRequest(token_id=token.id, request_count=0)
+            session.add(token_request)
+
+        
+        token_request.request_count += 1
+        await session.commit()
