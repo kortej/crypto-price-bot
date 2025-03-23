@@ -2,6 +2,7 @@ import logging
 import requests
 import app.api_requests as aq
 import app.FSMContext as fsm
+from DataBase.requests import set_user
 from aiogram import F, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
+    await set_user(tg_id=message.from_user.id, username=message.from_user.first_name)
     await message.answer("Викличте функцію /price щоб дізнатися ціну однієї монети!\nАбо напишіть назву токена і кількість!")
 
 
